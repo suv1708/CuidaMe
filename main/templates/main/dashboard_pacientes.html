@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Paciente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" id="paciente-dashboard">
+    <section class="dashboard-section perfil-paciente">
+        <div class="section-header">
+            <h2>Bienvenido, {{ paciente.user.first_name }} {{ paciente.user.last_name }}</h2>
+        </div>
+        <div class="section-content">
+            <div id="perfil-info" class="info-card">
+                <p><strong>Email:</strong> {{ paciente.user.email }}</p>
+                {% if paciente.telefono %}
+                <p><strong>Teléfono:</strong> {{ paciente.telefono }}</p>
+                {% endif %}
+                {% if paciente.historial_medico %}
+                <p><strong>Historial médico:</strong> {{ paciente.historial_medico }}</p>
+                {% endif %}
+            </div>
+            <div id="medico-notes-widget" class="medico-notes-widget info-card"></div>
+        </div>
+    </section>
+    
+    <section class="dashboard-section calendario-citas">
+        <div class="section-header">
+            <h3>📅 Resumen de Citas</h3>
+        </div>
+        <div class="section-content">
+            <div id="calendar-view" class="info-card">
+                {% if citas %}
+                    <table class="citas-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Médico</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas %}
+                            <tr>
+                                <td>{{ cita.fecha }}</td>
+                                <td>{{ cita.hora }}</td>
+                                <td>{{ cita.medico }}</td>
+                                <td>{{ cita.descripcion|default:"Sin descripción" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No tienes citas programadas.</p>
+                    <div class="action-buttons">
+                        <a href="{% url 'paciente_citas' %}" class="btn-primary">Agendar cita</a>
+                    </div>
+                {% endif %}
+            </div>
+            <div id="historial-citas" class="info-card"></div>
+        </div>
+    </section>
+    
+    <section class="dashboard-section gestion-salud">
+        <div class="section-header">
+            <h3>🩺 Seguimiento de Métricas Vitales</h3>
+        </div>
+        <div class="section-content">
+            <div class="metricas-container">
+                {% if metria %}
+                    <div class="metricas-grid">
+                        <div class="metrica-card">
+                            <h4>Estatura</h4>
+                            <p>{{ metria.estatura }} cm</p>
+                        </div>
+                        <div class="metrica-card">
+                            <h4>Peso</h4>
+                            <p>{{ metria.peso }} kg</p>
+                        </div>
+                        <div class="metrica-card">
+                            <h4>Presión Arterial</h4>
+                            <p>{{ metria.presion_arterial }}</p>
+                        </div>
+                        <div class="metrica-card">
+                            <h4>Frecuencia Cardíaca</h4>
+                            <p>{{ metria.frecuencia_cardiaca }} bpm</p>
+                        </div>
+                        <div class="metrica-card">
+                            <h4>Tipo de Sangre</h4>
+                            <p>{{ metria.tipo_sangre }}</p>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{% url 'paciente_metricas' %}" class="btn-secondary">Actualizar métricas</a>
+                    </div>
+                {% else %}
+                    <p>No tienes métricas registradas.</p>
+                    <div class="action-buttons">
+                        <a href="{% url 'paciente_metricas' %}" class="btn-primary">Registrar métricas</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block footer %}
+<footer>
+    <button id="chatbot-btn">💬</button>
+    <div id="chatbot-window">
+        <div id="chatbot-header">🤖 Asistente Cuídame</div>
+        <div id="chatbot-messages"></div>
+        <div id="chatbot-input">
+            <input type="text" id="user-input" placeholder="Pregunta sobre citas, historial o medicamentos...">
+            <button id="send-btn">Enviar</button>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'main/js/chatbot.js' %}"></script>
+{% endblock %}

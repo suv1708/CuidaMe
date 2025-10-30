@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Métricas de Salud{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h2>Métricas de Salud</h2>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                <h3>Registrar/Actualizar Métricas</h3>
+                <form method="post" action="{% url 'paciente_metricas' %}" class="form-metricas">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="estatura">Estatura (cm):</label>
+                            <input type="number" id="estatura" name="estatura" min="50" max="250" step="0.1" value="{{ metria.estatura|default:'' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="peso">Peso (kg):</label>
+                            <input type="number" id="peso" name="peso" min="1" max="300" step="0.1" value="{{ metria.peso|default:'' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="presion_arterial">Presión Arterial:</label>
+                            <input type="text" id="presion_arterial" name="presion_arterial" placeholder="120/80" value="{{ metria.presion_arterial|default:'' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="frecuencia_cardiaca">Frecuencia Cardíaca (bpm):</label>
+                            <input type="number" id="frecuencia_cardiaca" name="frecuencia_cardiaca" min="30" max="220" value="{{ metria.frecuencia_cardiaca|default:'' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipo_sangre">Tipo de Sangre:</label>
+                            <select id="tipo_sangre" name="tipo_sangre" required>
+                                <option value="">Seleccione tipo de sangre</option>
+                                <option value="A+" {% if metria.tipo_sangre == 'A+' %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if metria.tipo_sangre == 'A-' %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if metria.tipo_sangre == 'B+' %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if metria.tipo_sangre == 'B-' %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if metria.tipo_sangre == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if metria.tipo_sangre == 'AB-' %}selected{% endif %}>AB-</option>
+                                <option value="O+" {% if metria.tipo_sangre == 'O+' %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if metria.tipo_sangre == 'O-' %}selected{% endif %}>O-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_medicion">Fecha de Medición:</label>
+                            <input type="date" id="fecha_medicion" name="fecha_medicion" value="{{ today|date:'Y-m-d' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notas">Notas adicionales:</label>
+                        <textarea id="notas" name="notas" rows="3" placeholder="Información adicional sobre su salud">{{ metria.notas|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="submit" class="btn-primary">Guardar Métricas</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h3>Historial de Métricas</h3>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                {% if historial_metricas %}
+                    <table class="citas-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Estatura</th>
+                                <th>Peso</th>
+                                <th>Presión Arterial</th>
+                                <th>Frecuencia Cardíaca</th>
+                                <th>IMC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for metrica in historial_metricas %}
+                            <tr>
+                                <td>{{ metrica.fecha_medicion }}</td>
+                                <td>{{ metrica.estatura }} cm</td>
+                                <td>{{ metrica.peso }} kg</td>
+                                <td>{{ metrica.presion_arterial }}</td>
+                                <td>{{ metrica.frecuencia_cardiaca }} bpm</td>
+                                <td>{{ metrica.imc|floatformat:1 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No hay historial de métricas registradas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h3>Análisis de Salud</h3>
+        </div>
+        <div class="section-content">
+            <div class="metricas-grid">
+                <div class="metrica-card">
+                    <h4>IMC Actual</h4>
+                    {% if metria %}
+                        <p>{{ metria.imc|floatformat:1 }}</p>
+                        <p class="metrica-status">
+                            {% if metria.imc < 18.5 %}
+                                Bajo peso
+                            {% elif metria.imc < 25 %}
+                                Peso normal
+                            {% elif metria.imc < 30 %}
+                                Sobrepeso
+                            {% else %}
+                                Obesidad
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        <p>No disponible</p>
+                    {% endif %}
+                </div>
+                
+                <div class="metrica-card">
+                    <h4>Presión Arterial</h4>
+                    {% if metria and metria.presion_arterial %}
+                        <p>{{ metria.presion_arterial }}</p>
+                        <p class="metrica-status">
+                            {% with sistolica=metria.presion_arterial|slice:":3"|stringformat:"s"|safe %}
+                                {% if sistolica|floatformat:0 < 120 %}
+                                    Normal
+                                {% elif sistolica|floatformat:0 < 130 %}
+                                    Elevada
+                                {% elif sistolica|floatformat:0 < 140 %}
+                                    Hipertensión Etapa 1
+                                {% else %}
+                                    Hipertensión Etapa 2
+                                {% endif %}
+                            {% endwith %}
+                        </p>
+                    {% else %}
+                        <p>No disponible</p>
+                    {% endif %}
+                </div>
+                
+                <div class="metrica-card">
+                    <h4>Frecuencia Cardíaca</h4>
+                    {% if metria and metria.frecuencia_cardiaca %}
+                        <p>{{ metria.frecuencia_cardiaca }} bpm</p>
+                        <p class="metrica-status">
+                            {% if metria.frecuencia_cardiaca < 60 %}
+                                Bradicardia
+                            {% elif metria.frecuencia_cardiaca <= 100 %}
+                                Normal
+                            {% else %}
+                                Taquicardia
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        <p>No disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cálculo automático de IMC
+        const estaturaInput = document.getElementById('estatura');
+        const pesoInput = document.getElementById('peso');
+        
+        function calcularIMC() {
+            const estatura = parseFloat(estaturaInput.value) / 100; // convertir a metros
+            const peso = parseFloat(pesoInput.value);
+            
+            if (estatura > 0 && peso > 0) {
+                const imc = peso / (estatura * estatura);
+                console.log(`IMC calculado: ${imc.toFixed(1)}`);
+                // Aquí se podría mostrar el IMC en tiempo real
+            }
+        }
+        
+        estaturaInput.addEventListener('input', calcularIMC);
+        pesoInput.addEventListener('input', calcularIMC);
+    });
+</script>
+{% endblock %}

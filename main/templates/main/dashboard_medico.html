@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Panel Médico{% endblock %}
+
+{% block content %}
+<main class="dashboard-container">
+
+    <header class="dashboard-header">
+        <div class="logo-title">
+            <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo Cuídame">
+            <span>Panel del Médico</span>
+        </div>
+        <nav class="main-nav">
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-secondary">Cerrar Sesión</button>
+            </form>
+        </nav>
+    </header>
+
+    <section class="perfil-medico">
+        <h2>👨‍⚕️ Bienvenido, Dr. {{ medico.user.get_full_name }}</h2>
+        <p>Especialidad: {{ medico.especializacion }}</p>
+        <p>Correo: {{ medico.user.email }}</p>
+    </section>
+
+    <section class="lista-pacientes">
+        <h3>Pacientes Registrados</h3>
+        {% if pacientes %}
+            <ul class="pacientes-list">
+                {% for paciente in pacientes %}
+                    <li>
+                        <strong>{{ paciente.user.get_full_name }}</strong> <br>
+                        Email: {{ paciente.user.email }} <br>
+                        {% if paciente.metria %}
+                            <small>Presión: {{ paciente.metria.presion_arterial }} | Peso: {{ paciente.metria.peso }} kg</small><br>
+                        {% endif %}
+                        <a href="{% url 'detalle_paciente' paciente.id %}" class="btn-primary">Ver Detalle</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No hay pacientes registrados aún.</p>
+        {% endif %}
+    </section>
+
+</main>
+{% endblock %}

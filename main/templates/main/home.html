@@ -1,0 +1,41 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio{% endblock %}
+{% block content %}
+<main>
+        <section class="landing-hero">
+            <div class="portada-container">
+                <img src="{% static 'images/portada.jpeg' %}" class="portada" alt="Fondo de aplicación médica moderna">
+                <div class="portada-overlay">
+                    <h1>Tu Salud, Gestionada de Forma Inteligente.</h1>
+                    <p>Centraliza tu historial, recibe recordatorios de medicamentos y conecta directamente con tu equipo médico.</p>
+                    <button id="btn-iniciar-ahora" class="btn-accent">Empezar Ahora</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="feature-card">
+                <h3>🗓️ Citas y Agenda</h3>
+                <p>Programa consultas, recibe confirmaciones y gestiona tu historial de citas con tu médico.</p>
+            </div>
+            <div class="feature-card">
+                <h3>💊 Recordatorios Inteligentes</h3>
+                <p>Nunca olvides una dosis. Recibe alertas de medicamentos y mantente adherido a tu tratamiento.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📊 Tendencias de Salud</h3>
+                <p>Visualiza gráficas de tus métricas vitales (PA, Glucosa, Peso) para monitorear tu progreso.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📂 Historial Completo</h3>
+                <p>Almacena informes, resultados de laboratorio, alergias y vacunas en un solo lugar seguro.</p>
+            </div>
+        </section>
+    </main>
+
+    
+
+{% endblock %}

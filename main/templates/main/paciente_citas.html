@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Citas Paciente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h2>Gestión de Citas</h2>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                <h3>Agendar Nueva Cita</h3>
+                <form method="post" action="{% url 'paciente_citas' %}" class="form-cita">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="medico">Médico:</label>
+                        <select id="medico" name="medico" required>
+                            <option value="">Seleccione un médico</option>
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}">{{ medico.user.first_name }} {{ medico.user.last_name }} - {{ medico.especialidad }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha">Fecha:</label>
+                        <input type="date" id="fecha" name="fecha" required min="{{ today|date:'Y-m-d' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="hora">Hora:</label>
+                        <select id="hora" name="hora" required>
+                            <option value="">Seleccione una hora</option>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Motivo de la cita:</label>
+                        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Describa brevemente el motivo de su cita"></textarea>
+                    </div>
+                    <div class="action-buttons">
+                        <button type="submit" class="btn-primary">Agendar Cita</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h3>Mis Citas Programadas</h3>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                {% if citas %}
+                    <table class="citas-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Médico</th>
+                                <th>Especialidad</th>
+                                <th>Descripción</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas %}
+                            <tr>
+                                <td>{{ cita.fecha }}</td>
+                                <td>{{ cita.hora }}</td>
+                                <td>{{ cita.medico.user.first_name }} {{ cita.medico.user.last_name }}</td>
+                                <td>{{ cita.medico.especialidad }}</td>
+                                <td>{{ cita.descripcion|default:"Sin descripción" }}</td>
+                                
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No tienes citas programadas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h3>Historial de Citas</h3>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                {% if historial_citas %}
+                    <table class="citas-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Médico</th>
+                                <th>Especialidad</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in historial_citas %}
+                            <tr>
+                                <td>{{ cita.fecha }}</td>
+                                <td>{{ cita.hora }}</td>
+                                <td>{{ cita.medico.user.first_name }} {{ cita.medico.user.last_name }}</td>
+                                <td>{{ cita.medico.especialidad }}</td>
+                                <td>{{ cita.descripcion|default:"Sin descripción" }}</td>
+                                <td>{{ cita.get_estado_display }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No tienes historial de citas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lógica para validar disponibilidad de citas
+        const medicoSelect = document.getElementById('medico');
+        const fechaInput = document.getElementById('fecha');
+        const horaSelect = document.getElementById('hora');
+        
+        // Función para verificar disponibilidad
+        function verificarDisponibilidad() {
+            const medico = medicoSelect.value;
+            const fecha = fechaInput.value;
+            const hora = horaSelect.value;
+            
+            if (medico && fecha && hora) {
+                // Aquí se podría hacer una petición AJAX para verificar disponibilidad
+                console.log(`Verificando disponibilidad: Médico ${medico}, Fecha ${fecha}, Hora ${hora}`);
+            }
+        }
+        
+        medicoSelect.addEventListener('change', verificarDisponibilidad);
+        fechaInput.addEventListener('change', verificarDisponibilidad);
+        horaSelect.addEventListener('change', verificarDisponibilidad);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+/* Estilos responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+    /* Header y navegación */
+    .main-header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .main-nav {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Modales */
+    .modal-content {
+        margin: 10px;
+        width: auto;
+        padding: 1rem;
+    }
+
+    /* Formularios */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    label {
+        font-size: 0.9rem;
+    }
+
+    /* Dashboards */
+    .dashboard-medico,
+    .dashboard-paciente {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    section {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Estilos para tablets */
+@media (max-width: 1024px) {
+    .crear-paciente,
+    .lista-pacientes,
+    .perfil-paciente,
+    .historial-medico {
+        margin: 0 1rem;
+    }
+}
+
+/* Estilos para móviles grandes */
+@media (max-width: 640px) {
+    button {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        padding: 0.6rem;
+    }
+}
+
+/* Estilos para móviles pequeños */
+@media (max-width: 480px) {
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.8rem;
+    }
+
+    button {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}
