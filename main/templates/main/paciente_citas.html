@@ -23,7 +23,7 @@
                         <select id="medico" name="medico" required>
                             <option value="">Seleccione un médico</option>
                             {% for medico in medicos %}
-                                <option value="{{ medico.id }}">{{ medico.user.first_name }} {{ medico.user.last_name }} - {{ medico.especialidad }}</option>
+                                <option value="{{ medico.id }}">{{ medico.user.first_name }} {{ medico.user.last_name }} - {{ medico.especializacion }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -80,8 +80,8 @@
                                 <td>{{ cita.fecha }}</td>
                                 <td>{{ cita.hora }}</td>
                                 <td>{{ cita.medico.user.first_name }} {{ cita.medico.user.last_name }}</td>
-                                <td>{{ cita.medico.especialidad }}</td>
-                                <td>{{ cita.descripcion|default:"Sin descripción" }}</td>
+                                <td>{{ cita.medico.especializacion }}</td>
+                                <td>{{ cita.description|default:"Sin descripción" }}</td>
                                 
                             </tr>
                             {% endfor %}

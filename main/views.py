@@ -5,7 +5,7 @@ from .models import Medico, Paciente, Cita, Metria
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import CustomUserCreationForm, CustomLoginForm, MedicoForm, PacienteForm
+from .forms import *
 from .models import User, Medico, Paciente
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -74,8 +74,10 @@ def login_view(request):
             login(request, user)
             # Redirección automática según el tipo de usuario
             if hasattr(user, 'medico'):
+                messages.success(request, f'Bienvenido Dr. {user.first_name} {user.last_name}')
                 return redirect('dashboard_medico')
             elif hasattr(user, 'paciente'):
+                messages.success(request, f'Bienvenido {user.first_name} {user.last_name}')
                 return redirect('dashboard_paciente')
             return redirect('home')
         
@@ -115,16 +117,17 @@ def dashboard_medico(request):
     medico = request.user.medico
     # Obtener pacientes con citas con este médico
     citas = Cita.objects.filter(medico=medico).order_by('fecha', 'hora')
-    pacientes_con_citas = [cita.paciente for cita in citas]
     
     # Obtener todos los pacientes para referencia
     todos_pacientes = Paciente.objects.all()
     
+    
+    
     context = {
         'medico': medico,
         'citas': citas,
-        'pacientes_con_citas': pacientes_con_citas,
         'todos_pacientes': todos_pacientes,
+        
     }
     
     return render(request, 'main/dashboard_medico.html', context)
@@ -134,25 +137,31 @@ def detalle_paciente(request, paciente_id):
     """Vista para que el médico vea el detalle de un paciente específico"""
     if not hasattr(request.user, 'medico'):
         return redirect('dashboard_paciente')
-        
+
     paciente = get_object_or_404(Paciente, id=paciente_id)
-    
-    # Obtener métricas del paciente
-    try:
-        metria = Metria.objects.get(paciente=paciente)
-    except Metria.DoesNotExist:
-        metria = None
-    
-    # Obtener citas del paciente con este médico
-    citas = Cita.objects.filter(paciente=paciente, medico=request.user.medico).order_by('fecha', 'hora')
-    
+
+    # Obtener métricas y citas
+    metria = Metria.objects.filter(paciente=paciente).first()
+    citas = Cita.objects.filter(
+        paciente=paciente, medico=request.user.medico).order_by('fecha', 'hora')
+
+    if request.method == "POST":
+        form = PacienteEditForm(request.POST, instance=paciente)
+        if form.is_valid():
+            form.save()
+            return redirect('detalle_paciente', paciente_id=paciente.id)
+    else:
+        form = PacienteEditForm(instance=paciente)
+
     context = {
         'paciente': paciente,
         'metria': metria,
         'citas': citas,
+        'form': form,
     }
-    
     return render(request, 'main/detalle_paciente.html', context)
+    
+        
 
 @login_required
 def medico_perfil(request):
@@ -204,6 +213,7 @@ def dashboard_paciente(request):
 @login_required
 def paciente_citas(request):
     """Vista para gestionar citas del paciente"""
+        
     paciente = request.user.paciente
     citas = Cita.objects.filter(paciente=paciente).order_by('fecha', 'hora')
     medicos = Medico.objects.all()
@@ -284,10 +294,30 @@ def paciente_perfil(request):
     }
     return render(request, 'main/paciente_perfil.html', context)
 
+@login_required
+def editar_perfil_paciente(request):
+    """Vista para editar el perfil del paciente"""
+    paciente = request.user.paciente
+    form = PacienteForm(instance=request.user)
+    
+    if request.method == 'POST':
+        form = PacienteForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Perfil actualizado correctamente')
+            return redirect('paciente_perfil')
+        else:
+            messages.error(request, 'Error al actualizar el perfil')
+            context = {
+                'form': form
+            }
+            return render(request, 'main/perfil_edit.html', context)
 
-
-
-
-
+    context = {
+        'form': form
+    }
+    return render(request, 'main/perfil_edit.html', context)
+        
+    
 
 

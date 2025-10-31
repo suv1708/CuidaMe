@@ -13,34 +13,31 @@
 <body>
     <header class="main-header">
         <div class="logo-title">
-            <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo Cuídame">
-            <span>Cuídame</span>
+            <a href="{% url 'home' %}" style="text-decoration: none;"><img src="{% static 'images/logo.png' %}" class="logo" alt="Logo Cuídame">
+            <span>Cuídame</span></a>
         </div>
         <nav class="main-nav">
-            {% if user.is_authenticated and user.is_patient %}
-            <a href="{% url 'paciente_perfil' %}">Perfil</a>
-        <a href="{% url 'paciente_citas' %}">Citas</a>
-        <a href="{% url 'paciente_metricas' %}">Métricas</a>
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn-secondary">Cerrar Sesión</button>
-        </form>
-        {% elif user.is_authenticated and user.is_medic %}
-            <a href="{% url 'medico_perfil' %}">Perfil</a>
-            <a href="{% url 'medico_citas' %}">Citas</a>
-            <a href="{% url 'medico_metricas' %}">Métricas</a>
-            <form action="{% url 'logout' %}" method="post">
+            {% if user.is_authenticated and user.is_paciente %}
+                <a href="{% url 'paciente_perfil' %}" class="btn-primary" style="text-decoration: none;">Perfil</a>
+                <a href="{% url 'dashboard_paciente' %}" class="btn-primary" style="text-decoration: none;">Dashboard</a>
+                <a href="{% url 'paciente_citas' %}" class="btn-primary" style="text-decoration: none;">Citas</a>
+                <a href="{% url 'paciente_metricas' %}" class="btn-primary" style="text-decoration: none;">Métricas</a>
+                <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn-secondary">Cerrar Sesión</button>
-            </form>
-        {% else %}
-            <button id="loginBtn" class="btn-secondary">Iniciar Sesión</button>
-            
-            <button id="registerBtn" class="btn-primary">Registrarse</button>
+                </form>
+            {% elif user.is_authenticated and user.is_medico %}
+                <a href="{% url 'medico_perfil' %}" class="btn-primary" style="text-decoration: none;">Perfil</a>
+                <a href="{% url 'medico_citas' %}" class="btn-primary" style="text-decoration: none;">Citas</a> 
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-secondary">Cerrar Sesión</button>
+                </form>
+            {% else %}
+                <button id="loginBtn" class="btn-secondary">Iniciar Sesión</button>
+                
+                <button id="registerBtn" class="btn-primary">Registrarse</button>
             {% endif %}
-            
-            
-
         </nav>
         <div class="modal" id="login-modal">
         <div class="modal-content">

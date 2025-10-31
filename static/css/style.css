@@ -388,3 +388,8 @@ section {
     z-index: 999;
 }
 /* ... (El resto de estilos del chatbot se mantendría) ... */
+
+
+.main-nav a {
+    text-decoration: none;
+}

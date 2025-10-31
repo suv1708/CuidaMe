@@ -25,5 +25,18 @@ class MedicoForm(forms.ModelForm):
 
 class PacienteForm(forms.ModelForm):
     class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'username', 'phone_number']
+
+
+class PacienteEditForm(forms.ModelForm):
+    class Meta:
         model = Paciente
-        fields = []
+        fields = ['historial_medico']
+        widgets = {
+            'historial_medico': forms.TextInput(attrs={
+                'class': 'form-control',
+                'id': 'historiaInp',
+                'placeholder': 'Escribe o edita la historia clínica...'
+            })
+        }

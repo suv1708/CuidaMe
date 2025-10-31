@@ -1,48 +1,185 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Panel Médico{% endblock %}
+
+{% block title %}Dashboard Médico{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+{% endblock %}
 
 {% block content %}
-<main class="dashboard-container">
-
-    <header class="dashboard-header">
-        <div class="logo-title">
-            <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo Cuídame">
-            <span>Panel del Médico</span>
+<div class="dashboard-container" id="medico-dashboard">
+    <!-- Perfil del médico -->
+    <section class="dashboard-section perfil-medico">
+        <div class="section-header">
+            <h2>Bienvenido, Dr. {{ medico.user.first_name }} {{ medico.user.last_name }}</h2>
         </div>
-        <nav class="main-nav">
-            <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn-secondary">Cerrar Sesión</button>
-            </form>
-        </nav>
-    </header>
-
-    <section class="perfil-medico">
-        <h2>👨‍⚕️ Bienvenido, Dr. {{ medico.user.get_full_name }}</h2>
-        <p>Especialidad: {{ medico.especializacion }}</p>
-        <p>Correo: {{ medico.user.email }}</p>
+        <div class="section-content">
+            <div class="info-card">
+                <p><strong>Especialidad:</strong> {{ medico.especializacion }}</p>
+                <p><strong>Correo:</strong> {{ medico.user.email }}</p>
+                <div class="action-buttons">
+                    <a href="{% url 'medico_citas' %}" class="btn-primary">Gestionar Citas</a>
+                    <a href="{% url 'medico_perfil' %}" class="btn-secondary">Ver Perfil</a>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <section class="lista-pacientes">
-        <h3>Pacientes Registrados</h3>
-        {% if pacientes %}
-            <ul class="pacientes-list">
-                {% for paciente in pacientes %}
-                    <li>
-                        <strong>{{ paciente.user.get_full_name }}</strong> <br>
-                        Email: {{ paciente.user.email }} <br>
-                        {% if paciente.metria %}
-                            <small>Presión: {{ paciente.metria.presion_arterial }} | Peso: {{ paciente.metria.peso }} kg</small><br>
-                        {% endif %}
-                        <a href="{% url 'detalle_paciente' paciente.id %}" class="btn-primary">Ver Detalle</a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No hay pacientes registrados aún.</p>
-        {% endif %}
+    <!-- KPIs rápidos -->
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h3>📊 Indicadores</h3>
+        </div>
+        <div class="section-content">
+            <div class="metricas-grid">
+                <div class="metrica-card">
+                    <h4>Citas Totales</h4>
+                    <p>{{ citas|length }}</p>
+                </div>
+                <div class="metrica-card">
+                    <h4>Pacientes con Citas</h4>
+                    <p>{{ pacientes_con_citas|length }}</p>
+                </div>
+                <div class="metrica-card">
+                    <h4>Próxima Cita</h4>
+                    {% if citas %}
+                        <p>{{ citas.0.fecha }} {{ citas.0.hora }}</p>
+                    {% else %}
+                        <p>Sin próximas citas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </section>
 
-</main>
+    <!-- Resumen de citas -->
+    <section class="dashboard-section resumen-citas">
+        <div class="section-header">
+            <h3>📅 Resumen de Citas</h3>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                <div class="filters" style="display:flex; gap:1rem; align-items:center; margin-bottom:0.8rem;">
+                    <div class="form-group" style="flex:1;">
+                        <label for="buscar-cita">Buscar por paciente</label>
+                        <input type="text" id="buscar-cita" placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label for="filtrar-fecha">Filtrar por fecha</label>
+                        <input type="date" id="filtrar-fecha">
+                    </div>
+                </div>
+
+                {% if citas %}
+                <table class="citas-table" id="tabla-citas">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Paciente</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas %}
+                        <tr data-fecha="{{ cita.fecha }}" data-paciente="{{ cita.paciente.user.get_full_name|lower }}">
+                            <td>{{ cita.fecha }}</td>
+                            <td>{{ cita.hora }}</td>
+                            <td>{{ cita.paciente.user.get_full_name }}</td>
+                            <td>{{ cita.description|default:"Sin descripción" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <p>No tienes citas programadas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Pacientes atendidos -->
+    <section class="dashboard-section lista-pacientes">
+        <div class="section-header">
+            <h3>👥 Pacientes Atendidos</h3>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                <div class="form-group" style="max-width:420px; margin-bottom:0.8rem;">
+                    <label for="buscar-paciente">Buscar paciente</label>
+                    <input type="text" id="buscar-paciente" placeholder="Nombre o email">
+                </div>
+                {% if pacientes_con_citas %}
+                <table class="citas-table" id="tabla-pacientes">
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Email</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paciente in pacientes_con_citas %}
+                        <tr data-paciente="{{ paciente.user.get_full_name|lower }}" data-email="{{ paciente.user.email|lower }}">
+                            <td>{{ paciente.user.get_full_name }}</td>
+                            <td>{{ paciente.user.email }}</td>
+                            <td><a href="{% url 'detalle_paciente' paciente.id %}" class="btn-primary">Ver Detalle</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No hay pacientes con citas registradas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Lógica de filtrado ligera -->
+    <script>
+    (function(){
+        const buscarCita = document.getElementById('buscar-cita');
+        const filtrarFecha = document.getElementById('filtrar-fecha');
+        const tablaCitas = document.getElementById('tabla-citas');
+        const buscarPaciente = document.getElementById('buscar-paciente');
+        const tablaPacientes = document.getElementById('tabla-pacientes');
+
+        function filtraFilas(tbody, predicate){
+            if (!tbody) return;
+            Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+                tr.style.display = predicate(tr) ? '' : 'none';
+            });
+        }
+
+        // Filtro por nombre de paciente en citas
+        if (buscarCita && tablaCitas){
+            const tbody = tablaCitas.querySelector('tbody');
+            buscarCita.addEventListener('input', e => {
+                const q = e.target.value.toLowerCase();
+                filtraFilas(tbody, tr => tr.dataset.paciente.includes(q));
+            });
+        }
+
+        // Filtro por fecha en citas
+        if (filtrarFecha && tablaCitas){
+            const tbody = tablaCitas.querySelector('tbody');
+            filtrarFecha.addEventListener('change', e => {
+                const d = e.target.value; // formato YYYY-MM-DD
+                if (!d) { filtraFilas(tbody, () => true); return; }
+                filtraFilas(tbody, tr => tr.dataset.fecha === d);
+            });
+        }
+
+        // Búsqueda en pacientes atendidos
+        if (buscarPaciente && tablaPacientes){
+            const tbody = tablaPacientes.querySelector('tbody');
+            buscarPaciente.addEventListener('input', e => {
+                const q = e.target.value.toLowerCase();
+                filtraFilas(tbody, tr => tr.dataset.paciente.includes(q) || tr.dataset.email.includes(q));
+            });
+        }
+    })();
+    </script>
+</div>
 {% endblock %}

@@ -18,6 +18,11 @@ class User(AbstractUser):
     def __str__(self):
         return self.get_full_name()
     
+    def is_paciente(self):
+        return hasattr(self, 'paciente')
+    
+    def is_medico(self):
+        return hasattr(self, 'medico')
     
 class Paciente(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -62,7 +67,7 @@ class Medico(models.Model):
     
 class Cita(models.Model):
     medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
-    paciente = models.OneToOneField(Paciente, on_delete=models.CASCADE)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     fecha = models.DateField()
     hora = models.TimeField()
     description = models.TextField(blank=True, null=True)

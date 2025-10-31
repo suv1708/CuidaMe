@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil del Paciente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h2>Perfil del Paciente</h2>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                <div class="profile-info">
+                    <h3>Información Personal</h3>
+                    <p><strong>Nombre:</strong> {{ user.get_full_name }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Usuario:</strong> {{ user.username }}</p>
+                    {% if user.paciente %}
+                        <p><strong>Fecha de Nacimiento:</strong> {{ user.paciente.fecha_nacimiento|default:"No especificada" }}</p>
+                        <p><strong>Género:</strong> {{ user.paciente.genero|default:"No especificado" }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="action-buttons">
+                    <a class="btn-primary" id="editar-perfil-btn" 
+                    href="{% url 'editar_perfil_paciente' %}">Editar Perfil</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        const editarPerfilBtn = document.getElementById('editar-perfil-btn');
+        if (editarPerfilBtn) {
+            editarPerfilBtn.addEventListener('click', function() {
+                alert('Funcionalidad de edición de perfil en desarrollo');
+            });
+        }
+    });
+</script>
+{% endblock %}

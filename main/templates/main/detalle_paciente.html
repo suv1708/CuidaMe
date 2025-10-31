@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+{% endblock %}
+
+{% block title %}Paciente {{ paciente.user.first_name }} {{ paciente.user.last_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h3>Paciente {{ paciente.user.get_full_name }}</h3>
+        </div>
+
+        <div class="section-content">
+            <div class="info-card">
+                <div class="profile-info">
+                    <p><strong>Email:</strong> {{ paciente.user.email }}</p>
+                </div>
+
+                <div class="info-card">
+                    <form action="{% url 'detalle_paciente' paciente.id %}" method="post" class="editar-historia">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="historiaInp">Historia clínica</label>
+                            {{ form.historial_medico }}
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn-primary" type="submit">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

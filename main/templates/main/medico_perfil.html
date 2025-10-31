@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+
+{% endblock %}
+
+{% block title %}Dr. {{ medico.user.get_full_name }}{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h2>Bienvenido, Dr. {{ medico.user.get_full_name }}</h2>
+        </div>
+        <div class="section-content">
+            <div class="info-card">
+                <div class="profile-info">
+                    <p><strong>Especialidad:</strong> {{ medico.especializacion }}</p>
+                    <p><strong>Email:</strong> {{ medico.user.email }}</p>
+                    <p><strong>Número de teléfono: </strong> {{ medico.user.phone_number}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

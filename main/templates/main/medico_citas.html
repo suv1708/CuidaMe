@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Citas del Médico{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_pacientes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" id="medico-citas">
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h2>Gestión de Citas</h2>
+        </div>
+        <div class="section-content">
+            <div class="metricas-grid" style="margin-bottom:1rem;">
+                <div class="metrica-card">
+                    <h4>Total de Citas</h4>
+                    <p>{{ citas|length }}</p>
+                </div>
+                <div class="metrica-card">
+                    <h4>Próxima Cita</h4>
+                    {% if citas %}
+                        <p>{{ citas.0.fecha }} {{ citas.0.hora }}</p>
+                    {% else %}
+                        <p>Sin próximas citas</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="filters" style="display:flex; gap:1rem; align-items:flex-end; margin-bottom:0.8rem;">
+                    <div class="form-group" style="flex:1;">
+                        <label for="buscar-cita">Buscar por paciente</label>
+                        <input type="text" id="buscar-cita" placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label for="filtrar-fecha">Filtrar por fecha</label>
+                        <input type="date" id="filtrar-fecha">
+                    </div>
+                </div>
+
+                {% if citas %}
+                <table class="citas-table" id="tabla-citas">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Paciente</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas %}
+                        <tr data-fecha="{{ cita.fecha }}" data-paciente="{{ cita.paciente.user.get_full_name|lower }}">
+                            <td>{{ cita.fecha }}</td>
+                            <td>{{ cita.hora }}</td>
+                            <td>{{ cita.paciente.user.get_full_name }}</td>
+                            <td>{{ cita.description|default:"Sin descripción" }}</td>
+                            <td>
+                                <a href="{% url 'detalle_paciente' cita.paciente.id %}" class="btn-primary">Ver paciente</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <p>No tienes citas programadas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <script>
+    (function(){
+        const buscarCita = document.getElementById('buscar-cita');
+        const filtrarFecha = document.getElementById('filtrar-fecha');
+        const tablaCitas = document.getElementById('tabla-citas');
+
+        function filtraFilas(tbody, predicate){
+            if (!tbody) return;
+            Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+                tr.style.display = predicate(tr) ? '' : 'none';
+            });
+        }
+
+        // Filtro por paciente
+        if (buscarCita && tablaCitas){
+            const tbody = tablaCitas.querySelector('tbody');
+            buscarCita.addEventListener('input', e => {
+                const q = e.target.value.toLowerCase();
+                filtraFilas(tbody, tr => tr.dataset.paciente.includes(q));
+            });
+        }
+
+        // Filtro por fecha
+        if (filtrarFecha && tablaCitas){
+            const tbody = tablaCitas.querySelector('tbody');
+            filtrarFecha.addEventListener('change', e => {
+                const d = e.target.value; // YYYY-MM-DD
+                if (!d) { filtraFilas(tbody, () => true); return; }
+                filtraFilas(tbody, tr => tr.dataset.fecha === d);
+            });
+        }
+    })();
+    </script>
+</div>
+{% endblock %}
