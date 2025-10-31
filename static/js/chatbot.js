@@ -5,10 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const messagesDiv = document.getElementById("chatbot-messages");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
+    const isAuth = (chatbotWindow?.dataset?.auth || '').toLowerCase() === 'true';
+    const userRole = chatbotWindow?.dataset?.role || 'anon';
+    const userName = chatbotWindow?.dataset?.name || '';
 
     // --- Variables de Estado y Datos ---
     const usuarioActualEmail = localStorage.getItem('usuarioActual');
-    const tipoUsuario = localStorage.getItem('tipoUsuario');
+    
 
     // Función para obtener los datos del almacenamiento local de forma segura
     function cargarDatos() {
@@ -29,19 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Mostrar/Ocultar
     chatbotBtn?.addEventListener("click", () => {
-        if (chatbotWindow) {
-            if (chatbotWindow.style.display === "flex") {
-                chatbotWindow.style.display = "none";
-            } else {
-                chatbotWindow.style.display = "flex";
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                if (messagesDiv.children.length === 0) {
-                    agregarMensaje(
-                        `🤖 ¡Hola! Soy tu Asistente de Cuídame. ${usuario ? 'Veo que eres ' + usuario.nombre + '.' : 'Inicia sesión para ver tus datos.'} ¿En qué te puedo ayudar hoy?`, 
-                        "bot"
-                    );
-                    agregarMensaje("🤖 Puedes preguntarme sobre tu *próxima cita*, tus *medicamentos activos* o si tienes alguna *alergia*.", "bot");
-                }
+        if (!chatbotWindow) return;
+        const opening = !chatbotWindow.classList.contains('active');
+        chatbotWindow.classList.toggle('active');
+        if (opening) {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            if (messagesDiv.children.length === 0) {
+                const saludo = `🤖 ¡Hola! Soy tu Asistente de Cuídame. ${isAuth ? 'Veo que eres ' + (userName || 'usuario') + '.' : 'Inicia sesión para ver tus datos.'} ¿En qué te puedo ayudar hoy?`;
+                agregarMensaje(saludo, "bot");
+                agregarMensaje("🤖 Puedes preguntarme sobre tu próxima cita, tus medicamentos activos o si tienes alguna alergia.", "bot");
             }
         }
     });
@@ -112,11 +111,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Si no está logueado o la pregunta no es contextual
         if (!pacienteId && !usuarioActualEmail) {
-            return "🔒 Debes **iniciar sesión como Paciente** para que pueda revisar tu información personal (citas, medicamentos, alergias).";
+            if (!isAuth) {
+                return "🔒 Debes iniciar sesión para que pueda ayudarte con datos personales.";
+            }
+        }
+
+        if (texto.includes('cita')) {
+            if (userRole === 'paciente') return "📅 Revisa tus citas en /dashboard/paciente/citas/.";
+            if (userRole === 'medico') return "📅 Gestione sus citas en /dashboard/medico/citas/.";
+        }
+        if (texto.includes('perfil')) {
+            if (userRole === 'paciente') return "👤 Abre tu perfil en /dashboard/paciente/perfil/.";
+            if (userRole === 'medico') return "👤 Abra su perfil en /dashboard/medico/perfil/.";
+        }
+        if (texto.includes('dashboard')) {
+            if (userRole === 'paciente') return "📊 Ir al dashboard: /dashboard/paciente/.";
+            if (userRole === 'medico') return "📊 Ir al dashboard: /dashboard/medico/.";
         }
         
         // Si no entendió
-        return `❓ Lo siento, no entendí bien la pregunta. Por favor, sé más específico sobre: **Próxima cita**, **Medicamentos activos** o **Alergias**.`;
+        return "❓ No entendí bien. Pregunta sobre próxima cita, medicamentos activos o alergias.";
     }
 
     // 4. Envío de Mensajes
